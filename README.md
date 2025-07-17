@@ -6,8 +6,6 @@ Bot Discord permettant d'utiliser la commande `/say` pour faire parler un membre
     <img src="https://github.com/Snowphey/Chameleon/blob/19b5788c3dc35d11168145690469606c8c611f72/logo.png" alt="chameleon_logo"/ width=200>
 </p>
 
-
-
 ## Fonctionnalités principales
 - **/say <user> <message>** : Impersonate un membre du serveur pour envoyer un message comme si c'était lui.
 
@@ -26,14 +24,19 @@ Bot Discord permettant d'utiliser la commande `/say` pour faire parler un membre
 
 3. **Configurer le bot**
    - Remplir `config.json` comme suit :
-   - Renseigne ton token de bot, ton clientId et le guildId de ton serveur Discord :
+   - Renseigne ton token de bot, ton clientId, le guildId de ton serveur Discord, et éventuellement une liste d'utilisateurs à exclure (blacklist) :
      ```json
      {
        "token": "VOTRE_BOT_TOKEN",
        "clientId": "VOTRE_CLIENT_ID",
-       "guildId": "VOTRE_GUILD_ID"
+       "guildId": "VOTRE_GUILD_ID",
+       "blacklist": [
+         "ID_UTILISATEUR_1",
+         "ID_UTILISATEUR_2"
+       ]
      }
      ```
+   - La clé `blacklist` (optionnelle) permet d'exclure des utilisateurs (par leur ID Discord) de toutes les commandes du bot. Pour autoriser à nouveau un utilisateur, retire simplement son ID de la liste.
 
 4. **Déployer les commandes**
    ```sh

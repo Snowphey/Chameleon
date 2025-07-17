@@ -14,6 +14,15 @@ module.exports = {
                 .setDescription('Le message à envoyer')
                 .setRequired(true)),
     async execute(interaction) {
+        const { blacklist } = require('../../config.json');
+        if (blacklist && blacklist.includes(interaction.user.id)) {
+            await interaction.reply({
+                content: `⛔ Vous êtes exclu de l'utilisation de cette commande.`,
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
         const user = interaction.options.getUser('user');
         const message = interaction.options.getString('message');
         const channel = interaction.channel;
@@ -29,7 +38,6 @@ module.exports = {
             name: displayName,
             avatar: user.displayAvatarURL({ dynamic: true })
         });
-
 
         // Préparer les options du webhook (toujours texte simple)
         let options = {

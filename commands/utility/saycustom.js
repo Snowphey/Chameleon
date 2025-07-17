@@ -17,6 +17,15 @@ module.exports = {
                 .setDescription('Le message à envoyer')
                 .setRequired(true)),
     async execute(interaction) {
+        const { blacklist } = require('../../config.json');
+        if (blacklist && blacklist.includes(interaction.user.id)) {
+            await interaction.reply({
+                content: `⛔ Vous êtes exclu de l'utilisation de cette commande.`,
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
         const displayName = interaction.options.getString('displayname');
         const avatarURL = interaction.options.getString('avatarurl');
         const message = interaction.options.getString('message');
