@@ -2,6 +2,12 @@
 
 Bot Discord permettant d'utiliser la commande `/say` pour faire parler un membre du serveur via un webhook temporaire.
 
+<p align="center" width="100%">
+    <img src="https://github.com/Snowphey/Chameleon/blob/19b5788c3dc35d11168145690469606c8c611f72/logo.png" alt="chameleon_logo"/ width=200>
+</p>
+
+
+
 ## Fonctionnalités principales
 - **/say <user> <message>** : Impersonate un membre du serveur pour envoyer un message comme si c'était lui.
 
