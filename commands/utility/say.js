@@ -24,8 +24,11 @@ module.exports = {
         }
 
         const user = interaction.options.getUser('user');
-        const message = interaction.options.getString('message');
+        let message = interaction.options.getString('message');
         const channel = interaction.channel;
+
+        // Remplacer les séquences '\n' par des vrais retours à la ligne
+        message = message.replace(/\\n/g, '\n');
 
         // Récupérer le membre du serveur pour avoir le pseudo et la couleur
         const member = await interaction.guild.members.fetch(user.id);

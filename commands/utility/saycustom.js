@@ -28,8 +28,11 @@ module.exports = {
 
         const displayName = interaction.options.getString('displayname');
         const avatarURL = interaction.options.getString('avatarurl');
-        const message = interaction.options.getString('message');
+        let message = interaction.options.getString('message');
         const channel = interaction.channel;
+
+        // Remplacer les séquences '\n' par des vrais retours à la ligne
+        message = message.replace(/\\n/g, '\n');
 
         let webhook;
         try {
