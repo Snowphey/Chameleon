@@ -12,7 +12,10 @@ module.exports = {
         .addStringOption(option =>
             option.setName('message')
                 .setDescription('Le message à envoyer')
-                .setRequired(true)),
+                .setRequired(true))
+        .addBooleanOption(option =>
+            option.setName('preview')
+                .setDescription('Prévisualiser le message avant envoi')),
     async execute(interaction) {
         const { blacklist } = require('../../config.json');
         if (blacklist && blacklist.includes(interaction.user.id)) {
@@ -26,6 +29,7 @@ module.exports = {
         const user = interaction.options.getUser('user');
         let message = interaction.options.getString('message');
         const channel = interaction.channel;
+        const preview = interaction.options.getBoolean('preview');
 
         // Remplacer les séquences '\n' par des vrais retours à la ligne
         message = message.replace(/\\n/g, '\n');
@@ -36,28 +40,54 @@ module.exports = {
         // Chercher la couleur du rôle le plus haut (hors @everyone)
         const roleColor = member.roles.highest.color || null;
 
-        // Créer un webhook temporaire
-        const webhook = await channel.createWebhook({
-            name: displayName,
-            avatar: user.displayAvatarURL({ dynamic: true })
-        });
+        if (preview) {
+            // Afficher un embed de prévisualisation avec boutons
+            const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
+            const embed = new EmbedBuilder()
+                .setAuthor({ name: displayName, iconURL: user.displayAvatarURL({ dynamic: true }) })
+                .setDescription(message)
+                .setColor(roleColor || 0x2F3136);
 
-        // Préparer les options du webhook (toujours texte simple)
-        let options = {
-            content: message,
-            username: displayName,
-            avatarURL: user.displayAvatarURL({ dynamic: true })
-        };
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId('say_confirm')
+                    .setLabel('Valider')
+                    .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId('say_cancel')
+                    .setLabel('Annuler')
+                    .setStyle(ButtonStyle.Danger)
+            );
 
-        // Envoyer le message via le webhook
-        await webhook.send(options);
+            await interaction.reply({
+                embeds: [embed],
+                components: [row],
+                flags: MessageFlags.Ephemeral
+            });
+        } else {
+            // Créer un webhook temporaire
+            const webhook = await channel.createWebhook({
+                name: displayName,
+                avatar: user.displayAvatarURL({ dynamic: true })
+            });
 
-        // Supprimer le webhook après envoi
-        await webhook.delete();
+            // Préparer les options du webhook (toujours texte simple)
+            let options = {
+                content: message,
+                username: displayName,
+                avatarURL: user.displayAvatarURL({ dynamic: true })
+            };
 
-        await interaction.reply({ 
-            content: `Message envoyé en tant que ${displayName}.`, 
-            flags: MessageFlags.Ephemeral
-        });
+            // Envoyer le message via le webhook
+            await webhook.send(options);
+
+            // Supprimer le webhook après envoi
+            await webhook.delete();
+
+            await interaction.reply({ 
+                content: `Message envoyé en tant que ${displayName}.`, 
+                flags: MessageFlags.Ephemeral
+            });
+        }
     },
 };
