@@ -38,16 +38,22 @@ module.exports = {
 				const avatarURL = embed.author?.iconURL;
 				const content = embed.description;
 				const channel = interaction.channel;
+				// Récupérer l'URL de l'image depuis l'embed (preview)
+				const imageUrl = embed.image?.url;
 				// Créer le webhook et envoyer le message
 				const webhook = await channel.createWebhook({
 					name: displayName,
 					avatar: avatarURL
 				});
-				await webhook.send({
+				let webhookOptions = {
 					content,
 					username: displayName,
 					avatarURL
-				});
+				};
+				if (imageUrl) {
+					webhookOptions.files = [imageUrl];
+				}
+				await webhook.send(webhookOptions);
 				await webhook.delete();
 				await interaction.update({ content: `Message envoyé en tant que ${displayName}.`, embeds: [], components: [], flags: MessageFlags.Ephemeral });
 			}

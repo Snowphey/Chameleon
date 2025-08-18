@@ -13,9 +13,14 @@ module.exports = {
             option.setName('message')
                 .setDescription('Le message à envoyer')
                 .setRequired(true))
+        .addAttachmentOption(option =>
+            option.setName('upload')
+                .setDescription("Image à uploader et joindre au message")
+                .setRequired(false))
         .addBooleanOption(option =>
             option.setName('preview')
-                .setDescription('Prévisualiser le message avant envoi')),
+                .setDescription('Prévisualiser le message avant envoi')
+                .setRequired(false)),
     async execute(interaction) {
         const { blacklist } = require('../../config.json');
         if (blacklist && blacklist.includes(interaction.user.id)) {
@@ -30,6 +35,7 @@ module.exports = {
         let message = interaction.options.getString('message');
         const channel = interaction.channel;
         const preview = interaction.options.getBoolean('preview');
+        const upload = interaction.options.getAttachment('upload');
 
         // Remplacer les séquences '\n' par des vrais retours à la ligne
         message = message.replace(/\\n/g, '\n');
@@ -47,6 +53,9 @@ module.exports = {
                 .setAuthor({ name: displayName, iconURL: user.displayAvatarURL({ dynamic: true }) })
                 .setDescription(message)
                 .setColor(roleColor || 0x2F3136);
+                if (upload) {
+                    embed.setImage(upload.url);
+                }
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -77,6 +86,9 @@ module.exports = {
                 username: displayName,
                 avatarURL: user.displayAvatarURL({ dynamic: true })
             };
+            if (upload) {
+                options.files = [upload.url];
+            }
 
             // Envoyer le message via le webhook
             await webhook.send(options);

@@ -14,9 +14,14 @@ module.exports = {
             option.setName('message')
                 .setDescription('Le message à envoyer')
                 .setRequired(true))
+        .addAttachmentOption(option =>
+            option.setName('upload')
+                .setDescription("Image à uploader et joindre au message")
+                .setRequired(false))
         .addBooleanOption(option =>
             option.setName('preview')
-                .setDescription('Prévisualiser le message avant envoi')),
+                .setDescription('Prévisualiser le message avant envoi')
+                .setRequired(false)),
     async autocomplete(interaction) {
         const focusedValue = interaction.options.getFocused();
         const userId = interaction.user.id;
@@ -49,6 +54,7 @@ module.exports = {
         let message = interaction.options.getString('message');
         const channel = interaction.channel;
         const preview = interaction.options.getBoolean('preview');
+        const upload = interaction.options.getAttachment('upload');
 
         // Remplacer les séquences '\n' par des vrais retours à la ligne
         message = message.replace(/\\n/g, '\n');
@@ -83,6 +89,9 @@ module.exports = {
                     .setAuthor({ name: identity.name, iconURL: identity.avatar_url })
                     .setDescription(message)
                     .setColor(0x2F3136);
+                    if (upload) {
+                        embed.setImage(upload.url);
+                    }
 
                 const row = new ActionRowBuilder().addComponents(
                     new ButtonBuilder()
@@ -111,11 +120,15 @@ module.exports = {
                 });
 
                 // Envoyer le message via le webhook
-                await webhook.send({
+                let options = {
                     content: message,
                     username: identity.name,
                     avatarURL: identity.avatar_url
-                });
+                };
+                if (upload) {
+                    options.files = [upload.url];
+                }
+                await webhook.send(options);
 
                 await interaction.editReply({
                     content: `Message envoyé en tant que ${identity.name}.`

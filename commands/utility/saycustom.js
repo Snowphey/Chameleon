@@ -17,9 +17,14 @@ module.exports = {
             option.setName('message')
                 .setDescription('Le message à envoyer')
                 .setRequired(true))
+        .addAttachmentOption(option =>
+            option.setName('upload')
+                .setDescription("Image à uploader et joindre au message")
+                .setRequired(false))
         .addBooleanOption(option =>
             option.setName('preview')
-                .setDescription('Prévisualiser le message avant envoi')),
+                .setDescription('Prévisualiser le message avant envoi')
+                .setRequired(false)),
     async execute(interaction) {
         const { blacklist } = require('../../config.json');
         if (blacklist && blacklist.includes(interaction.user.id)) {
@@ -35,6 +40,7 @@ module.exports = {
         let message = interaction.options.getString('message');
         const channel = interaction.channel;
         const preview = interaction.options.getBoolean('preview');
+        const upload = interaction.options.getAttachment('upload');
 
         // Validation basique de l'URL
         try {
@@ -68,6 +74,9 @@ module.exports = {
                 .setAuthor({ name: displayName, iconURL: avatarURL })
                 .setDescription(message)
                 .setColor(0x2F3136);
+                if (upload) {
+                    embed.setImage(upload.url);
+                }
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -96,11 +105,15 @@ module.exports = {
             });
 
             // Envoyer le message via le webhook
-            await webhook.send({
+            let options = {
                 content: message,
                 username: displayName,
                 avatarURL: avatarURL
-            });
+            };
+            if (upload) {
+                options.files = [upload.url];
+            }
+            await webhook.send(options);
 
             await interaction.editReply({
                 content: `Message envoyé en tant que ${displayName}.`
